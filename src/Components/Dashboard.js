@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import axios from "axios";
+import { connect } from "react-redux";
 import PostDisplay from "./PostDisplay";
 
 class Dashboard extends Component {
@@ -11,32 +13,58 @@ class Dashboard extends Component {
   }
 
   componentDidMount() {
-
+    this.getPosts();
   }
 
   getPosts = () => {
-      
+    axios
+      .get(`/api/post/${this.props.user.user_id}`)
+      .then(res => {
+        this.setState({ posts: res.data });
+      })
+      .catch(err => console.log(err));
   };
 
   handleChange = e => {
-    
+    this.setState({ userInput: e.target.value });
   };
 
-  handleClick = () => {
+  submitNewPost = () => {
+    axios
+      .post(`/api/post/${this.props.user.user_id}`, {
+        post: this.state.userInput
+      })
+      .then(() => this.getPosts())
+      .catch(err => console.log(err));
   };
 
-  handleEdit = () => {
-   
+  handleEdit = (post_id, text) => {
+    axios
+      .put(`/api/post/${post_id}`, { text })
+      .then(() => {
+        this.getPosts();
+      })
+      .catch(err => console.log(err));
   };
 
-  handleDelete = () => {
+  handleDelete = post_id => {
+    app
+      //just needs post id
+      .delete(`/api/post/${post_id}`)
+      .then(() => {
+        this.getPosts();
+      })
+      .catch(err => console.log(err));
   };
 
   render() {
     const mappedPosts = this.state.posts.map((post, index) => {
       return (
         <PostDisplay
-        //something goes here
+          key={index}
+          handleEdit={this.handleEdit}
+          handleDelete={this.handleDelete}
+          post={post}
         />
       );
     });
@@ -48,22 +76,21 @@ class Dashboard extends Component {
             cols="60"
             rows="2"
             placeholder="New post..."
-            value={
-              //something goes here
-            }
+            value={this.state.userInput}
             onChange={e => {
               this.handleChange(e);
             }}
           />
-          <button onClick={
-            //something goes here
-          } className="input-container-button">
+          <button
+            onClick={() => this.submitNewPost()}
+            className="input-container-button"
+          >
             Post
           </button>
         </div>
 
         <section className="app-body">
-          <div className="padding"/>
+          <div className="padding" />
           <ul className="flex-vertical-center post-feed">{mappedPosts}</ul>
         </section>
       </>
@@ -71,4 +98,11 @@ class Dashboard extends Component {
   }
 }
 
-export default Dashboard;
+const mapStateToProps = state => {
+  const { user } = state;
+  return {
+    user
+  };
+};
+
+export default connect(mapStateToProps)(Dashboard);

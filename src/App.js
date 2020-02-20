@@ -1,7 +1,9 @@
 import React from "react";
+import { withRouter } from "react-router-dom";
 import Header from "./Components/Header";
 import AuthHeader from "./Components/AuthHeader";
 import "./App.css";
+import routes from "./routes";
 
 function App(props) {
   return (
@@ -10,16 +12,16 @@ function App(props) {
       props.location.pathname === "/register" ? (
         <>
           <AuthHeader />
-          {/* something goes here */}
+          {routes}
         </>
       ) : (
         <>
           <Header />
-          {/* something goes here */}
+          {routes}
         </>
       )}
     </div>
   );
 }
 
-export default App;
+export default withRouter(App);
